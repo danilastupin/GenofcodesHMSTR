@@ -4,36 +4,50 @@ import aiohttp
 import time
 
 DEBUG = False
-MAX_RETRIES = 6
+MAX_RETRIES = 20
 OUTPUT_FILE = "promo_codes.txt"
 LOOP_DELAY = 2 * 60  # Delay between complete cycles in seconds (2 minutes)
 
 games = {
-    "BIKE": {
-        "appToken": "d28721be-fd2d-4b45-869e-9f253b554e50",
-        "promoId": "43e35910-c168-4634-ad4f-52fd764a843f",
-        "delay": 20,
-        "retry": 20,
-        "keys": 4,
-    },
-    "CLONE": {
+    "My Clone Army": {
         "appToken": "74ee0b5b-775e-4bee-974f-63e7f4d5bacb",
         "promoId": "fe693b26-b342-4159-8808-15e3ff7f8767",
         "delay": 120,
         "retry": 20,
         "keys": 4,
     },
-    "CUBE": {
+    "Riding Extreme 3D": {
+        "appToken": "d28721be-fd2d-4b45-869e-9f253b554e50",
+        "promoId": "43e35910-c168-4634-ad4f-52fd764a843f",
+        "delay": 20,
+        "retry": 20,
+        "keys": 4,
+    },
+    "Chain Cube 2048": {
         "appToken": "d1690a07-3780-4068-810f-9b5bbf2931b2",
         "promoId": "b4170868-cef0-424f-8eb9-be0622e8e8e3",
         "delay": 20,
         "retry": 20,
         "keys": 4,
     },
-    "TRAIN": {
+    "Train Miner": {
         "appToken": "82647f43-3f87-402d-88dd-09a90025313f",
         "promoId": "c4480ac7-e178-4973-8061-9ed5b2e17954",
         "delay": 120,
+        "retry": 20,
+        "keys": 4,
+    },
+    "Merge Away": {
+        "appToken": "8d1cc2ad-e097-4b86-90ef-7a27e19fb833",
+        "promoId": "dc128d28-c45b-411c-98ff-ac7726fbaea4",
+        "delay": 20,
+        "retry": 20,
+        "keys": 4,
+    },
+    "Twerk Race 3D": {
+        "appToken": "61308365-9d16-4040-8bb0-2f4a4c69074c",
+        "promoId": "61308365-9d16-4040-8bb0-2f4a4c69074c",
+        "delay": 20,
         "retry": 20,
         "keys": 4,
     },
@@ -87,8 +101,6 @@ async def get_promo_code(session, game_key):
         info(f"Failed to login client for {game_key}: {e}")
         return None
 
-    await asyncio.sleep(game_config["delay"])
-
     auth_token = login_client_data.get("clientToken")
     if not auth_token:
         info(f"Failed to obtain auth token for {game_key}")
@@ -98,6 +110,7 @@ async def get_promo_code(session, game_key):
 
     for _ in range(MAX_RETRIES):
         try:
+            await asyncio.sleep(game_config["delay"])
             register_event_data = await fetch_api(
                 session,
                 "/promo/register-event",
@@ -140,7 +153,7 @@ async def get_promo_code(session, game_key):
 
 async def main():
     async with aiohttp.ClientSession() as session:
-        with open(OUTPUT_FILE, "a") as f:  #  ('a' - append mode)
+        with open(OUTPUT_FILE, "a") as f:  # ('a' - append mode)
             while True:
                 for game_key in games:
                     promo_codes = []
