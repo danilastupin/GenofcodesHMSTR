@@ -51,6 +51,13 @@ games = {
         "retry": 20,
         "keys": 4,
     },
+    "POLY": {
+        "appToken": "2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71",
+        "promoId": "2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71",
+        "delay": 20,
+        "retry": 20,
+        "keys": 4,
+    },
 }
 
 
