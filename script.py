@@ -91,7 +91,7 @@ async def get_promo_code(session, game_key):
             info(f"Failed to register event for {game_key}: {e}")
             await asyncio.sleep(game_config["retry"])
             continue
-        print(register_event_data)
+
         if not register_event_data.get("hasCode"):
             await asyncio.sleep(game_config["retry"])
             continue
