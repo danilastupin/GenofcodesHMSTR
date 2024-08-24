@@ -120,21 +120,16 @@ async def get_promo_code(session, game_key):
 
 async def main():
     global games
-    async with aiohttp.ClientSession() as session:
-        while not games:
-            try:
-                games = await fetch_api(session, games_url, method="get")
-            except Exception as e:
-                print(e)
-            time.sleep(3)
+    while True:
+        async with aiohttp.ClientSession() as session:
 
-        for x in range(1000):
-            file_path = f"promo_codes_{x}.txt"
-            if os.path.exists(file_path):
-                continue
+            games = await fetch_api(session, games_url, method="get")
 
-            with open(file_path, "a") as f:  # ('a' - append mode)
-                while True:
+            for x in range(1000):
+                file_path = f"promo_codes_{x}.txt"
+                if os.path.exists(file_path):
+                    continue
+                with open(file_path, "a") as f:  # ('a' - append mode)
                     for game_key in games:
                         promo_codes = []
                         for _ in range(games[game_key]["keys"]):
@@ -143,8 +138,8 @@ async def main():
                                 info(f"{code}")
                                 promo_codes.append(f"{code}\n")
                         f.writelines(promo_codes)
-                    info(f"End of cycle. Wait {LOOP_DELAY} second before next cycle.")
-                    await asyncio.sleep(LOOP_DELAY)
+                info(f"End of cycle. Wait {LOOP_DELAY} second before next cycle.")
+                await asyncio.sleep(LOOP_DELAY)
 
 
 if __name__ == "__main__":
