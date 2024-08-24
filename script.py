@@ -136,7 +136,7 @@ async def main():
                             code = await get_promo_code(session, games[game_key])
                             if code:
                                 info(f"{code}")
-                                promo_codes.append(f"{code}\n")
+                                promo_codes.append(f"`{code}`\n")
                         f.writelines(promo_codes)
                 info(f"End of cycle. Wait {LOOP_DELAY} second before next cycle.")
                 await asyncio.sleep(LOOP_DELAY)
