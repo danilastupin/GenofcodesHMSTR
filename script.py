@@ -9,6 +9,7 @@ DEBUG = False
 MAX_RETRIES = 20
 LOOP_DELAY = 2 * 60  # Delay between complete cycles in seconds (2 minutes)
 games_url = "https://raw.githubusercontent.com/SP-l33t/GenofcodesHMSTR/main/games.json"
+amount_of_files = 1000
 games = None
 
 
@@ -120,26 +121,26 @@ async def get_promo_code(session, game_key):
 
 async def main():
     global games
-    while True:
-        async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession() as session:
+        for x in range(amount_of_files):
+            file_path = f"promo_codes_{x}.txt"
+            if os.path.exists(file_path):
+                continue
 
+            info('Refreshing games config')
             games = await fetch_api(session, games_url, method="get")
 
-            for x in range(1000):
-                file_path = f"promo_codes_{x}.txt"
-                if os.path.exists(file_path):
-                    continue
-                with open(file_path, "a") as f:  # ('a' - append mode)
-                    for game_key in games:
-                        promo_codes = []
-                        for _ in range(games[game_key]["keys"]):
-                            code = await get_promo_code(session, games[game_key])
-                            if code:
-                                info(f"{code}")
-                                promo_codes.append(f"`{code}`\n")
-                        f.writelines(promo_codes)
-                info(f"End of cycle. Wait {LOOP_DELAY} second before next cycle.")
-                await asyncio.sleep(LOOP_DELAY)
+            with open(file_path, "a") as f:  # ('a' - append mode)
+                for game_key in games:
+                    promo_codes = []
+                    for _ in range(games[game_key]["keys"]):
+                        code = await get_promo_code(session, games[game_key])
+                        if code:
+                            info(f"{code}")
+                            promo_codes.append(f"`{code}`\n")
+                    f.writelines(promo_codes)
+            info(f"End of cycle. Wait {LOOP_DELAY} second before next cycle.")
+            await asyncio.sleep(LOOP_DELAY)
 
 
 if __name__ == "__main__":
