@@ -2,77 +2,15 @@ import uuid
 import asyncio
 import aiohttp
 import time
+import json
+import os
 
 DEBUG = False
 MAX_RETRIES = 20
-OUTPUT_FILE = "promo_codes.txt"
 LOOP_DELAY = 2 * 60  # Delay between complete cycles in seconds (2 minutes)
-
-games = {
-    "My Clone Army": {
-        "appToken": "74ee0b5b-775e-4bee-974f-63e7f4d5bacb",
-        "promoId": "fe693b26-b342-4159-8808-15e3ff7f8767",
-        "delay": 120,
-        "retry": 20,
-        "keys": 4,
-    },
-    "Riding Extreme 3D": {
-        "appToken": "d28721be-fd2d-4b45-869e-9f253b554e50",
-        "promoId": "43e35910-c168-4634-ad4f-52fd764a843f",
-        "delay": 20,
-        "retry": 20,
-        "keys": 4,
-    },
-    "Chain Cube 2048": {
-        "appToken": "d1690a07-3780-4068-810f-9b5bbf2931b2",
-        "promoId": "b4170868-cef0-424f-8eb9-be0622e8e8e3",
-        "delay": 20,
-        "retry": 20,
-        "keys": 4,
-    },
-    "Train Miner": {
-        "appToken": "82647f43-3f87-402d-88dd-09a90025313f",
-        "promoId": "c4480ac7-e178-4973-8061-9ed5b2e17954",
-        "delay": 120,
-        "retry": 20,
-        "keys": 4,
-    },
-    "Merge Away": {
-        "appToken": "8d1cc2ad-e097-4b86-90ef-7a27e19fb833",
-        "promoId": "dc128d28-c45b-411c-98ff-ac7726fbaea4",
-        "delay": 20,
-        "retry": 20,
-        "keys": 4,
-    },
-    "Twerk Race 3D": {
-        "appToken": "61308365-9d16-4040-8bb0-2f4a4c69074c",
-        "promoId": "61308365-9d16-4040-8bb0-2f4a4c69074c",
-        "delay": 20,
-        "retry": 20,
-        "keys": 4,
-    },
-    "POLY": {
-        "appToken": "2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71",
-        "promoId": "2aaf5aee-2cbc-47ec-8a3f-0962cc14bc71",
-        "delay": 20,
-        "retry": 20,
-        "keys": 4,
-    },
-    "MOW": {
-        "appToken": "ef319a80-949a-492e-8ee0-424fb5fc20a6",
-        "promoId": "ef319a80-949a-492e-8ee0-424fb5fc20a6",
-        "delay": 20,
-        "retry": 20,
-        "keys": 4,
-    },
-    "MUD": {
-        "appToken": "8814a785-97fb-4177-9193-ca4180ff9da8",
-        "promoId": "8814a785-97fb-4177-9193-ca4180ff9da8",
-        "delay": 20,
-        "retry": 20,
-        "keys": 4,
-    },
-}
+games_url = "https://raw.githubusercontent.com/SP-l33t/GenofcodesHMSTR/main/games.json"
+amount_of_files = 1000
+games = None
 
 
 def debug(*args):
@@ -84,8 +22,8 @@ def info(*args):
     print(*args)
 
 
-async def fetch_api(session, path, auth_token=None, body=None):
-    url = f"https://api.gamepromo.io{path}"
+async def fetch_api(session, path, method="post", auth_token=None, body=None):
+    url = f"https://api.gamepromo.io{path}" if not path.startswith("http") else path
     headers = {}
 
     if auth_token:
@@ -93,19 +31,26 @@ async def fetch_api(session, path, auth_token=None, body=None):
 
     if body is not None:
         headers["content-type"] = "application/json"
+    if method == "post":
+        async with session.post(url, headers=headers, json=body) as response:
+            debug(f"URL: {url}, Headers: {headers}, Body: {body}")
+            if response.status != 200:
+                error_message = await response.text()
+                debug(f"Error {response.status}: {error_message}")
+                raise Exception(f"{response.status} {response.reason}: {error_message}")
+            return await response.json()
 
-    async with session.post(url, headers=headers, json=body) as response:
-        debug(f"URL: {url}, Headers: {headers}, Body: {body}")
-        if response.status != 200:
-            error_message = await response.text()
-            debug(f"Error {response.status}: {error_message}")
-            raise Exception(f"{response.status} {response.reason}: {error_message}")
-
-        return await response.json()
+    elif method == "get":
+        async with session.get(url) as response:
+            if response.status != 200:
+                error_message = await response.text()
+                debug(f"Error {response.status}: {error_message}")
+                raise Exception(f"{response.status} {response.reason}: {error_message}")
+            return json.loads(await response.text())
 
 
 async def get_promo_code(session, game_key):
-    game_config = games[game_key]
+    game_config = game_key
     client_id = str(uuid.uuid4())
 
     try:
@@ -135,7 +80,8 @@ async def get_promo_code(session, game_key):
             register_event_data = await fetch_api(
                 session,
                 "/promo/register-event",
-                auth_token,
+                method="post",
+                auth_token=auth_token,
                 body={
                     "promoId": game_config["promoId"],
                     "eventId": str(uuid.uuid4()),
@@ -155,7 +101,8 @@ async def get_promo_code(session, game_key):
             create_code_data = await fetch_api(
                 session,
                 "/promo/create-code",
-                auth_token,
+                method="post",
+                auth_token=auth_token,
                 body={
                     "promoId": game_config["promoId"],
                 },
@@ -173,19 +120,27 @@ async def get_promo_code(session, game_key):
 
 
 async def main():
+    global games
     async with aiohttp.ClientSession() as session:
-        with open(OUTPUT_FILE, "a") as f:  # ('a' - append mode)
-            while True:
+        for x in range(amount_of_files):
+            file_path = f"promo_codes_{x}.txt"
+            if os.path.exists(file_path):
+                continue
+
+            info('Refreshing games config')
+            games = await fetch_api(session, games_url, method="get")
+
+            with open(file_path, "a") as f:  # ('a' - append mode)
                 for game_key in games:
                     promo_codes = []
                     for _ in range(games[game_key]["keys"]):
-                        code = await get_promo_code(session, game_key)
+                        code = await get_promo_code(session, games[game_key])
                         if code:
                             info(f"{code}")
-                            promo_codes.append(f"{code}\n")
+                            promo_codes.append(f"`{code}`\n")
                     f.writelines(promo_codes)
-                info(f"End of cycle. Wait {LOOP_DELAY} second before next cycle.")
-                await asyncio.sleep(LOOP_DELAY)
+            info(f"End of cycle. Wait {LOOP_DELAY} second before next cycle.")
+            await asyncio.sleep(LOOP_DELAY)
 
 
 if __name__ == "__main__":
