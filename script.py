@@ -8,7 +8,7 @@ from random import randint
 DEBUG = False
 MAX_RETRIES = 30
 LOOP_DELAY = 2 * 60  # Delay between complete cycles in seconds (2 minutes)
-games_url = "https://raw.githubusercontent.com/SP-l33t/GenofcodesHMSTR/main/games.json"
+games_url = "https://raw.githubusercontent.com/danilastupin/GenofcodesHMSTR/main/games.json"
 amount_of_files = 1000
 games = None
 
