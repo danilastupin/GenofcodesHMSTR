@@ -1,4 +1,4 @@
-name: 1codes
+name: newtest.yml
 on:
   workflow_dispatch:
 
@@ -22,3 +22,9 @@ jobs:
       - name: Run the script
         run: |
           python script.py
+          
+      - name: Upload promo codes as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: promo-codes
+          path: promo_codes.txt
