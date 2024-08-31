@@ -22,8 +22,10 @@ jobs:
       - name: Run the script
         run: |
           python script.py
-          
+        continue-on-error: true
+        
       - name: Upload promo codes as artifact
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: promo-codes
