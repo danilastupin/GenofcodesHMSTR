@@ -1,4 +1,4 @@
-name: 2codes
+name: 2codes.yml
 on:
   workflow_dispatch:
 
@@ -22,3 +22,11 @@ jobs:
       - name: Run the script
         run: |
           python script.py
+        continue-on-error: true
+        
+      - name: Upload promo codes as artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: promo-codes
+          path: promo_codes.txt
