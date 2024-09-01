@@ -1,10 +1,12 @@
 name: newtest.yml
+
 on:
   workflow_dispatch:
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -23,10 +25,10 @@ jobs:
         run: |
           python test.py
         continue-on-error: true
-        
+
       - name: Upload promo codes as artifact
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: promo-codes
-          path: ./promo_codes.txt
+          path: promo_codes.txt
