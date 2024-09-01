@@ -1,0 +1,151 @@
+import uuid
+import aiohttp
+import asyncio
+import json
+import os
+from random import randint
+
+DEBUG = False
+MAX_RETRIES = 30
+LOOP_DELAY = 2 * 60  # Delay between complete cycles in seconds (2 minutes)
+games_url = "https://raw.githubusercontent.com/danilastupin/GenofcodesHMSTR/main/games.json"
+amount_of_files = 1000
+games = None
+
+
+def debug(*args):
+    if DEBUG:
+        print(*args)
+
+
+def info(*args):
+    print(*args)
+
+
+async def fetch_api(session, path, method="post", auth_token=None, body=None):
+    url = f"https://api.gamepromo.io{path}" if not path.startswith("http") else path
+    headers = {}
+
+    if auth_token:
+        headers["authorization"] = f"Bearer {auth_token}"
+
+    if body is not None:
+        headers["content-type"] = "application/json"
+    if method == "post":
+        async with session.post(url, headers=headers, json=body) as response:
+            debug(f"URL: {url}, Headers: {headers}, Body: {body}")
+            if response.status != 200:
+                error_message = await response.text()
+                debug(f"Error {response.status}: {error_message}")
+                raise Exception(f"{response.status} {response.reason}: {error_message}")
+            return await response.json()
+
+    elif method == "get":
+        async with session.get(url) as response:
+            if response.status != 200:
+                error_message = await response.text()
+                debug(f"Error {response.status}: {error_message}")
+                raise Exception(f"{response.status} {response.reason}: {error_message}")
+            return json.loads(await response.text())
+
+
+async def get_promo_code(session, game_key):
+    game_config = games[game_key]
+    client_id = str(uuid.uuid4())
+
+    try:
+        login_client_data = await fetch_api(
+            session,
+            "/promo/login-client",
+            body={
+                "appToken": game_config["appToken"],
+                "clientId": client_id,
+                "clientOrigin": "ios",
+            },
+        )
+    except Exception as e:
+        info(f"Failed to login client for {game_key}: {e}")
+        return None
+
+    auth_token = login_client_data.get("clientToken")
+    if not auth_token:
+        info(f"Failed to obtain auth token for {game_key}")
+        return None
+
+    promo_code = None
+
+    for _ in range(MAX_RETRIES):
+        try:
+            await asyncio.sleep(game_config["delay"])
+            register_event_data = await fetch_api(
+                session,
+                "/promo/register-event",
+                method="post",
+                auth_token=auth_token,
+                body={
+                    "promoId": game_config["promoId"],
+                    "eventId": str(uuid.uuid4()),
+                    "eventOrigin": "undefined",
+                },
+            )
+        except Exception as e:
+            info(f"Failed to register event for {game_key}: {e}")
+            await asyncio.sleep(game_config["retry"])
+            continue
+
+        if not register_event_data.get("hasCode"):
+            await asyncio.sleep(game_config["retry"])
+            continue
+
+        try:
+            create_code_data = await fetch_api(
+                session,
+                "/promo/create-code",
+                method="post",
+                auth_token=auth_token,
+                body={
+                    "promoId": game_config["promoId"],
+                },
+            )
+            promo_code = create_code_data.get("promoCode")
+            break
+        except Exception as e:
+            info(f"Failed to create code for {game_key}: {e}")
+            await asyncio.sleep(game_config["retry"])
+
+    if not promo_code:
+        info(f"Unable to get {game_key} promo after {MAX_RETRIES} retries")
+
+    return promo_code
+
+async def main():
+    global games
+    async with aiohttp.ClientSession() as session:
+        file_path = "./promo_codes.txt"
+
+        info('Refreshing games config')
+        games = await fetch_api(session, games_url, method="get")
+
+        while True:
+            promo_codes = []
+
+            # Создаем задачи для записи кодов для каждой игры.
+            async def write_promo_codes(game_key):
+                await asyncio.sleep(randint(1, 10))
+                for _ in range(games[game_key]["keys"]):
+                    code = await get_promo_code(session, game_key)
+                    if code:
+                        info(f"Получен промокод: {code}")
+                        promo_codes.append(f"`{code}`\n")
+
+            tasks = [write_promo_codes(game_key) for game_key in games]
+            await asyncio.gather(*tasks)
+
+            # Записываем полученные промокоды в файл.
+            with open(file_path, "a") as f:
+                f.writelines(sorted(promo_codes))
+
+            info("End of cycle. Wait before next cycle.")
+            await asyncio.sleep(LOOP_DELAY)
+if __name__ == "__main__":
+    asyncio.run(main())
