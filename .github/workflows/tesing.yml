@@ -29,4 +29,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: promo-codes
-          path: ./promo_codes_*.txt
+          path: ./promo_codes.txt
