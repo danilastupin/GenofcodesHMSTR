@@ -135,13 +135,11 @@ async def main():
                 for _ in range(games[game_key]["keys"]):
                     code = await get_promo_code(session, game_key)
                     if code:
-                        info(f"Получен промокод: {code}")
                         promo_codes.append(f"`{code}`\n")
 
             tasks = [write_promo_codes(game_key) for game_key in games]
             await asyncio.gather(*tasks)
 
-            # Записываем полученные промокоды в файл.
             with open(file_path, "a") as f:
                 f.writelines(sorted(promo_codes))
 
