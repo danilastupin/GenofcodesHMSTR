@@ -123,7 +123,7 @@ async def main():
     global games
     async with aiohttp.ClientSession() as session:
         for x in range(amount_of_files):
-            file_path = f"promo_codes_{x}.txt"
+            file_path = f"./promo_codes_*.txt"
             if os.path.exists(file_path):
                 continue
 
