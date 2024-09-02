@@ -34,9 +34,3 @@ jobs:
 
       - name: Trigger Script Workflow 8
         uses: ./.github/workflows/run-script-8.yml
-
-      - name: Trigger Script Workflow 9
-        uses: ./.github/workflows/run-script-9.yml
-
-      - name: Trigger Script Workflow 10
-        uses: ./.github/workflows/run-script-10.yml
