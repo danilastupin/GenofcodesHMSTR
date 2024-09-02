@@ -1,10 +1,15 @@
-name: 9.yml
+name: Run Promo Code Script 5
+
 on:
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Trigger All Promo Code Scripts"]
+    types:
+      - requested
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -21,12 +26,12 @@ jobs:
 
       - name: Run the script
         run: |
-          python script.py
+          python test.py
         continue-on-error: true
-        
+
       - name: Upload promo codes as artifact
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: promo-codes
-          path: promo_codes.txt
+          path: ./promo_codes.txt
