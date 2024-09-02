@@ -1,0 +1,33 @@
+name: Download and Send Promo Codes
+
+on:
+  workflow_run:
+    workflows: ["Trigger All Promo Code Workflows"]
+    types:
+      - completed
+
+jobs:
+  download-and-send:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download promo codes artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: promo-codes
+          path: ./downloaded_promo_codes
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Send promo codes to Telegram
+        env:
+          TELEGRAM_API_KEY: ${{ secrets.TELEGRAM_API_KEY }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }} 
+        run: |
+          python send_to_telegram.py

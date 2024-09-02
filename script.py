@@ -122,28 +122,26 @@ async def get_promo_code(session, game_key):
 async def main():
     global games
     async with aiohttp.ClientSession() as session:
-        for x in range(amount_of_files):
-            file_path = f"./promo_codes_*.txt"
-            if os.path.exists(file_path):
-                continue
-
-            info('Refreshing games config')
+        promo_codes_file_path = "./promo_codes.txt"
+        while True:
             games = await fetch_api(session, games_url, method="get")
             promo_codes = []
-            with open(file_path, "a") as f:
-                async def write_promo_codes(game_key):
-                    await asyncio.sleep(randint(1, 10))
-                    for _ in range(games[game_key]["keys"]):
-                        code = await get_promo_code(session, game_key)
-                        if code:
-                            info(f"{code}")
-                            promo_codes.append(f"`{code}`\n")
 
-                tasks = [write_promo_codes(game_key) for game_key in games]
-                await asyncio.gather(*tasks)
+            async def write_promo_codes(game_key):
+                await asyncio.sleep(randint(1, 10))
+                for _ in range(games[game_key]["keys"]):
+                    code = await get_promo_code(session, game_key)
+                    if code:
+                        info(f"{code}")
+                        promo_codes.append(f"`{code}`\n")
+
+            tasks = [write_promo_codes(game_key) for game_key in games]
+            await asyncio.gather(*tasks)
+
+            with open(promo_codes_file_path, "a") as f:
                 f.writelines(sorted(promo_codes))
 
-            info(f"End of cycle. Wait {LOOP_DELAY} second before next cycle.")
+            info(f"End of circle {LOOP_DELAY}.")
             await asyncio.sleep(LOOP_DELAY)
 
 
