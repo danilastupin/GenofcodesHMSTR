@@ -9,49 +9,49 @@ jobs:
 
     steps:
       - name: Trigger Script Workflow 1
-        uses: repo-owner/repo-name/.github/workflows/run-script-1.yml@main
+        uses: danilastupin/GenofcodesHMSTR/.github/workflows/run-script-1.yml@main
         with:
           workflow: 'run-script-1.yml'
           ref: 'refs/heads/main'
 
       - name: Trigger Script Workflow 2
-        uses: repo-owner/repo-name/.github/workflows/run-script-2.yml@main
+        uses: danilastupin/GenofcodesHMSTR/.github/workflows/run-script-2.yml@main
         with:
           workflow: 'run-script-2.yml'
           ref: 'refs/heads/main'
 
       - name: Trigger Script Workflow 3
-        uses: repo-owner/repo-name/.github/workflows/run-script-3.yml@main
+        uses: danilastupin/GenofcodesHMSTR/.github/workflows/run-script-3.yml@main
         with:
           workflow: 'run-script-3.yml'
           ref: 'refs/heads/main'
 
       - name: Trigger Script Workflow 4
-        uses: repo-owner/repo-name/.github/workflows/run-script-4.yml@main
+        uses: danilastupin/GenofcodesHMSTR/.github/workflows/run-script-4.yml@main
         with:
           workflow: 'run-script-4.yml'
           ref: 'refs/heads/main'
 
       - name: Trigger Script Workflow 5
-        uses: repo-owner/repo-name/.github/workflows/run-script-5.yml@main
+        uses: danilastupin/GenofcodesHMSTR/.github/workflows/run-script-5.yml@main
         with:
           workflow: 'run-script-5.yml'
           ref: 'refs/heads/main'
           
       - name: Trigger Script Workflow 6
-        uses: repo-owner/repo-name/.github/workflows/run-script-6.yml@main
+        uses: danilastupin/GenofcodesHMSTR/.github/workflows/run-script-6.yml@main
         with:
           workflow: 'run-script-6.yml'
           ref: 'refs/heads/main'
 
       - name: Trigger Script Workflow 7
-        uses: repo-owner/repo-name/.github/workflows/run-script-7.yml@main
+        uses: danilastupin/GenofcodesHMSTR/.github/workflows/run-script-7.yml@main
         with:
           workflow: 'run-script-7.yml'
           ref: 'refs/heads/main'
           
       - name: Trigger Script Workflow 8
-        uses: repo-owner/repo-name/.github/workflows/run-script-8.yml@main
+        uses: danilastupin/GenofcodesHMSTR/.github/workflows/run-script-8.yml@main
         with:
           workflow: 'run-script-8.yml'
           ref: 'refs/heads/main'
