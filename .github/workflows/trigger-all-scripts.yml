@@ -1,0 +1,42 @@
+name: Trigger All Promo Code Scripts
+
+on:
+  workflow_dispatch:
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Trigger Script Workflow 1
+        uses: ./.github/workflows/run-script-1.yml
+
+      - name: Trigger Script Workflow 2
+        uses: ./.github/workflows/run-script-2.yml
+
+      - name: Trigger Script Workflow 3
+        uses: ./.github/workflows/run-script-3.yml
+
+      - name: Trigger Script Workflow 4
+        uses: ./.github/workflows/run-script-4.yml
+
+      - name: Trigger Script Workflow 5
+        uses: ./.github/workflows/run-script-5.yml
+
+      - name: Trigger Script Workflow 6
+        uses: ./.github/workflows/run-script-6.yml
+
+      - name: Trigger Script Workflow 7
+        uses: ./.github/workflows/run-script-7.yml
+
+      - name: Trigger Script Workflow 8
+        uses: ./.github/workflows/run-script-8.yml
+
+      - name: Trigger Script Workflow 9
+        uses: ./.github/workflows/run-script-9.yml
+
+      - name: Trigger Script Workflow 10
+        uses: ./.github/workflows/run-script-10.yml
