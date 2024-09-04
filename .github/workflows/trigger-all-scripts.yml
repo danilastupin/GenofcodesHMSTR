@@ -34,21 +34,3 @@ jobs:
 
       - name: Trigger Script Workflow 8
         uses: ./.github/workflows/run-script-8.yml
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v3
-        with:
-          path: ./downloaded_artifacts
-
-      - name: Upload artifacts to Telegram
-        run: |
-          sudo apt-get install -y curl
-          for file in ./downloaded_artifacts/*; do
-            # Send each file to Telegram
-            curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendDocument" \
-              -F chat_id="$TELEGRAM_CHAT_ID" \
-              -F document=@"$file"
-          done
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
