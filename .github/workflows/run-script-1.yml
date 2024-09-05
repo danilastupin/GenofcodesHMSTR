@@ -5,6 +5,7 @@ on:
     workflows: ["Trigger All Promo Code Scripts"]
     types:
       - requested
+  workflow_dispatch:
 
 jobs:
   run-script:
