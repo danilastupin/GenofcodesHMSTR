@@ -1,10 +1,6 @@
 name: Run Promo Code Script 1
 
 on:
-  workflow_run:
-    workflows: ["Trigger All Promo Code Scripts"]
-    types:
-      - requested
   workflow_dispatch:
 
 jobs:
