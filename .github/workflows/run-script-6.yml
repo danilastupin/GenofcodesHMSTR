@@ -1,10 +1,7 @@
 name: Run Promo Code Script 6
 
 on:
-  workflow_run:
-    workflows: ["Trigger All Promo Code Scripts"]
-    types:
-      - requested
+  workflow_dispatch:
 
 jobs:
   run-script:
@@ -34,4 +31,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: promo-codes
-          path: ./promo_codes.txt
+          path: ./6promo_codes.txt
