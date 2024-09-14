@@ -75,5 +75,12 @@
         "delay": 120,
         "retry": 20,
         "keys": 4
+    },
+    "Hide": {
+        "appToken": "4bf4966c-4d22-439b-8ff2-dc5ebca1a600",
+        "promoId": "4bf4966c-4d22-439b-8ff2-dc5ebca1a600",
+        "delay": 120,
+        "retry": 20,
+        "keys": 4
     }
 }
